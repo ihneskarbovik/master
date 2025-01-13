@@ -1,11 +1,9 @@
 import numpy as np
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense, LSTM
 from sklearn.preprocessing import MinMaxScaler
 
+'''Returns a numpy array of list '''
 def series_split_sequences(f, t, n_steps_in, n_steps_out):
     X, y = [], []
     curr_campaign = ''
@@ -28,7 +26,22 @@ def series_split_sequences(f, t, n_steps_in, n_steps_out):
         y.append(seq_y)
     return np.array(X), np.array(y)
 
-def LSTM(X, target_feature:str, features:list, n_steps_in = 5, n_steps_out = 1):
+'''
+    Returns the mean absolute deviation
+'''
+def mad(y_pred, y_true):
+    pred_series, true_series = [], []
+
+    for i in range(len(y_pred)):
+        for k in range(len(y_pred[i])):
+            pred_series.append(y_pred[i][k])
+            true_series.append(y_true[i][k])
+
+    pred_series, true_series = np.array(pred_series), np.array(true_series)
+
+    return np.mean(np.abs(pred_series - np.mean(true_series)))
+
+def long_short_term_memory(X, target_feature:str, features:list, n_steps_in=5, n_steps_out=1):
 
     scaler = MinMaxScaler(feature_range=(0, 1))
     X[features] = scaler.fit_transform(X[features])
@@ -36,10 +49,11 @@ def LSTM(X, target_feature:str, features:list, n_steps_in = 5, n_steps_out = 1):
     X, y = series_split_sequences(X, X[target_feature], n_steps_in, n_steps_out)
 
     train_size = len(y) // 3 * 2
-    test_size = (len(y) - train_size)
+    test_size = (len(y) - train_size) // 2
 
     X_train, y_train = X[len(y) - train_size ::], y[len(y) - train_size ::]
     X_val, y_val = X[0 : test_size], y[0 : test_size]
+    X_test, y_test = X[test_size : len(y) - train_size], y[test_size : len(y) - train_size]
 
     model = Sequential()
     model.add(LSTM(units=10,
@@ -63,13 +77,20 @@ def LSTM(X, target_feature:str, features:list, n_steps_in = 5, n_steps_out = 1):
     scaler_pred = MinMaxScaler()
     scaler_pred.min_, scaler_pred.scale_ = scaler.min_[0], scaler.scale_[0]
 
-    results = {
+    y_pred = model.predict(X_test, verbose=0)
+
+    y_pred = scaler_pred.inverse_transform(y_pred)
+    y_true = scaler_pred.inverse_transform(y_test)
+
+    results = {'y_pred': y_pred,
+               'y_true': y_true,
                'loss' : history.history['loss'],
                'loss_final' : round(history.history['loss'][-1], 5),
                'val_loss' : history.history['val_loss'],
                'val_loss_final' : round(history.history['val_loss'][-1], 5),
                'LSTM': model,
-               'scaler_pred': scaler_pred
+               'scaler_pred': scaler_pred,
+               'mad': round(mad(y_pred, y_true), 1)
                }
 
     return results

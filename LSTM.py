@@ -1,6 +1,6 @@
 import numpy as np
-from keras.models import Sequential
-from keras.layers import Dense, LSTM
+from keras.models import Sequential # type: ignore
+from keras.layers import Dense, LSTM # type: ignore
 from sklearn.preprocessing import MinMaxScaler
 
 '''

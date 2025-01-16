@@ -3,7 +3,9 @@ from keras.models import Sequential
 from keras.layers import Dense, LSTM
 from sklearn.preprocessing import MinMaxScaler
 
-'''Returns a numpy array of list '''
+'''
+    Returns a numpy array of list 
+'''
 def series_split_sequences(f, t, n_steps_in, n_steps_out):
     X, y = [], []
     curr_campaign = ''
@@ -24,6 +26,7 @@ def series_split_sequences(f, t, n_steps_in, n_steps_out):
             curr_campaign = f['campaign'].iloc[i]
         X.append(seq_x.drop('campaign', axis=1))
         y.append(seq_y)
+
     return np.array(X), np.array(y)
 
 '''
@@ -41,19 +44,40 @@ def mad(y_pred, y_true):
 
     return np.mean(np.abs(pred_series - np.mean(true_series)))
 
-def long_short_term_memory(X, target_feature:str, features:list, n_steps_in=5, n_steps_out=1):
+'''
+    Returns the mean absolute deviation on each datapoint
+'''
+def single_point_mad(y_pred, y_true):
+    pred_series, true_series = [], []
 
-    scaler = MinMaxScaler(feature_range=(0, 1))
+    for i in range(len(y_pred)):
+        for k in range(len(y_pred[i])):
+            pred_series.append(y_pred[i][k])
+            true_series.append(y_true[i][k])
+
+    pred_series, true_series = np.array(pred_series), np.array(true_series)
+
+    return np.mean(np.abs(pred_series - true_series))
+
+
+def long_short_term_memory(X, test_idx, target_feature:str, features:list, n_steps_in=5, n_steps_out=1):
+
+    features.remove('campaign')
+
+    scaler = MinMaxScaler()
     X[features] = scaler.fit_transform(X[features])
-    
-    X, y = series_split_sequences(X, X[target_feature], n_steps_in, n_steps_out)
 
-    train_size = len(y) // 3 * 2
-    test_size = (len(y) - train_size) // 2
+    train, test = X[0 : test_idx], X[test_idx ::]
 
-    X_train, y_train = X[len(y) - train_size ::], y[len(y) - train_size ::]
-    X_val, y_val = X[0 : test_size], y[0 : test_size]
-    X_test, y_test = X[test_size : len(y) - train_size], y[test_size : len(y) - train_size]
+    X, y = series_split_sequences(train, train[target_feature], n_steps_in, n_steps_out)
+
+    train_idx = 4 * len(y) // 5
+
+    features.append('campaign')
+
+    X_train, y_train = X[0 : train_idx], y[0 : train_idx]
+    X_val, y_val = X[train_idx ::], y[train_idx ::]
+    X_test, y_test = series_split_sequences(test[features], test[target_feature], n_steps_in, n_steps_out)
 
     model = Sequential()
     model.add(LSTM(units=10,
@@ -90,7 +114,8 @@ def long_short_term_memory(X, target_feature:str, features:list, n_steps_in=5, n
                'val_loss_final' : round(history.history['val_loss'][-1], 5),
                'LSTM': model,
                'scaler_pred': scaler_pred,
-               'mad': round(mad(y_pred, y_true), 1)
+               'mad': round(mad(y_pred, y_true), 1),
+               'mad?': round(single_point_mad(y_pred, y_true), 2)
                }
 
     return results

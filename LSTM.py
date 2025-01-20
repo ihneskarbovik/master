@@ -60,14 +60,16 @@ def single_point_mad(y_pred, y_true):
     return np.mean(np.abs(pred_series - true_series))
 
 
-def long_short_term_memory(X, test_idx, target_feature:str, features:list, n_steps_in=5, n_steps_out=1):
+def long_short_term_memory(df, test_idx, target_feature:str, features:list, n_steps_in=5, n_steps_out=1):
 
     features.remove('campaign')
 
-    scaler = MinMaxScaler()
-    X[features] = scaler.fit_transform(X[features])
+    idx_target = features.index(target_feature)
 
-    train, test = X[0 : test_idx], X[test_idx ::]
+    scaler = MinMaxScaler()
+    df[features] = scaler.fit_transform(df[features])
+
+    train, test = df[0 : test_idx], df[test_idx ::]
 
     X, y = series_split_sequences(train, train[target_feature], n_steps_in, n_steps_out)
 
@@ -97,11 +99,11 @@ def long_short_term_memory(X, test_idx, target_feature:str, features:list, n_ste
               epochs=100,
               validation_data=(X_val, y_val),
               shuffle=True, verbose=0)
+    
+    y_pred = model.predict(X_test, verbose=0)
 
     scaler_pred = MinMaxScaler()
-    scaler_pred.min_, scaler_pred.scale_ = scaler.min_[0], scaler.scale_[0]
-
-    y_pred = model.predict(X_test, verbose=0)
+    scaler_pred.min_, scaler_pred.scale_ = scaler.min_[idx_target], scaler.scale_[idx_target]
 
     y_pred = scaler_pred.inverse_transform(y_pred)
     y_true = scaler_pred.inverse_transform(y_test)
@@ -112,8 +114,6 @@ def long_short_term_memory(X, test_idx, target_feature:str, features:list, n_ste
                'loss_final' : round(history.history['loss'][-1], 5),
                'val_loss' : history.history['val_loss'],
                'val_loss_final' : round(history.history['val_loss'][-1], 5),
-               'LSTM': model,
-               'scaler_pred': scaler_pred,
                'mad': round(mad(y_pred, y_true), 1),
                'mad?': round(single_point_mad(y_pred, y_true), 2)
                }

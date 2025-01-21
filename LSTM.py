@@ -60,26 +60,23 @@ def single_point_mad(y_pred, y_true):
     return np.mean(np.abs(pred_series - true_series))
 
 
-def long_short_term_memory(df, test_idx, target_feature:str, features:list, n_steps_in=5, n_steps_out=1):
+def long_short_term_memory(train, test, target_feature:str, features:list, n_steps_in=5, n_steps_out=1):
 
     features.remove('campaign')
 
     idx_target = features.index(target_feature)
 
     scaler = MinMaxScaler()
-    df[features] = scaler.fit_transform(df[features])
-
-    train, test = df[0 : test_idx], df[test_idx ::]
+    train[features] = scaler.fit_transform(train[features])
+    test[features] = scaler.transform(test[features])
 
     X, y = series_split_sequences(train, train[target_feature], n_steps_in, n_steps_out)
+    X_test, y_test = series_split_sequences(test, test[target_feature], n_steps_in, n_steps_out)
 
     train_idx = 4 * len(y) // 5
 
-    features.append('campaign')
-
     X_train, y_train = X[0 : train_idx], y[0 : train_idx]
     X_val, y_val = X[train_idx ::], y[train_idx ::]
-    X_test, y_test = series_split_sequences(test[features], test[target_feature], n_steps_in, n_steps_out)
 
     model = Sequential()
     model.add(LSTM(units=10,

@@ -79,11 +79,11 @@ def long_short_term_memory(train, test, target_feature:str, features:list, n_ste
     X_val, y_val = X[train_idx ::], y[train_idx ::]
 
     model = Sequential()
-    model.add(LSTM(units=10,
+    model.add(LSTM(units=5,
                    activation='relu', recurrent_activation='sigmoid',
                    return_sequences=True, return_state=False
                    ))
-    model.add(LSTM(units=10,
+    model.add(LSTM(units=20,
                    activation='relu', recurrent_activation='sigmoid',
                    return_sequences=False, return_state=False
                    ))
@@ -91,22 +91,26 @@ def long_short_term_memory(train, test, target_feature:str, features:list, n_ste
     model.compile(loss='mse',
                   optimizer='adam')
     
-
     history = model.fit(X_train, y_train,
               epochs=100,
               validation_data=(X_val, y_val),
               shuffle=True, verbose=0)
     
     y_pred = model.predict(X_test, verbose=0)
+    train_pred = model.predict(X_train, verbose=0)
 
     scaler_pred = MinMaxScaler()
     scaler_pred.min_, scaler_pred.scale_ = scaler.min_[idx_target], scaler.scale_[idx_target]
 
     y_pred = scaler_pred.inverse_transform(y_pred)
     y_true = scaler_pred.inverse_transform(y_test)
+    train_pred = scaler_pred.inverse_transform(train_pred)
+    y_train = scaler_pred.inverse_transform(y_train)
 
     results = {'y_pred': y_pred,
                'y_true': y_true,
+               'train_pred': train_pred,
+               'train_true': y_train,
                'loss' : history.history['loss'],
                'loss_final' : round(history.history['loss'][-1], 5),
                'val_loss' : history.history['val_loss'],

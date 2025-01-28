@@ -1,6 +1,7 @@
 import numpy as np
 from keras.models import Sequential # type: ignore
-from keras.layers import Dense, LSTM # type: ignore
+from keras.layers import Dense, LSTM, Dropout # type: ignore
+from keras.optimizers import RMSprop # type: ignore
 from sklearn.preprocessing import MinMaxScaler
 
 '''
@@ -78,18 +79,21 @@ def long_short_term_memory(train, test, target_feature:str, features:list, n_ste
     X_train, y_train = X[0 : train_idx], y[0 : train_idx]
     X_val, y_val = X[train_idx ::], y[train_idx ::]
 
+    optimizer = RMSprop(learning_rate=0.001, rho=0.9) # , epsilon=None)
+
     model = Sequential()
     model.add(LSTM(units=5,
                    activation='relu', recurrent_activation='sigmoid',
                    return_sequences=True, return_state=False
                    ))
+    # model.add(Dropout(0.2))
     model.add(LSTM(units=20,
                    activation='relu', recurrent_activation='sigmoid',
                    return_sequences=False, return_state=False
                    ))
+    # model.add(Dropout(0.2))
     model.add(Dense(n_steps_out, activation='sigmoid'))
-    model.compile(loss='mse',
-                  optimizer='adam')
+    model.compile(loss='mse', optimizer='adam')
     
     history = model.fit(X_train, y_train,
               epochs=100,

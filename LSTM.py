@@ -58,10 +58,10 @@ def single_point_mad(y_pred, y_true):
 
     pred_series, true_series = np.array(pred_series), np.array(true_series)
 
-    return np.mean(np.abs(pred_series - true_series))
+    return np.mean(np.abs(pred_series - true_series)), np.abs(pred_series - true_series)
 
 
-def long_short_term_memory(train, test, target_feature:str, features:list, n_steps_in=5, n_steps_out=1):
+def long_short_term_memory(train, test, target_feature:str, features:list, n_steps_in=5, n_steps_out=1, n_first_units=5, n_second_units=10):
 
     features.remove('campaign')
 
@@ -79,15 +79,15 @@ def long_short_term_memory(train, test, target_feature:str, features:list, n_ste
     X_train, y_train = X[0 : train_idx], y[0 : train_idx]
     X_val, y_val = X[train_idx ::], y[train_idx ::]
 
-    optimizer = RMSprop(learning_rate=0.001, rho=0.9) # , epsilon=None)
+    # optimizer = RMSprop(learning_rate=0.001, rho=0.9) # , epsilon=None) 
 
     model = Sequential()
-    model.add(LSTM(units=5,
+    model.add(LSTM(units=n_first_units,
                    activation='relu', recurrent_activation='sigmoid',
                    return_sequences=True, return_state=False
                    ))
     # model.add(Dropout(0.2))
-    model.add(LSTM(units=20,
+    model.add(LSTM(units=n_second_units,
                    activation='relu', recurrent_activation='sigmoid',
                    return_sequences=False, return_state=False
                    ))
@@ -101,26 +101,41 @@ def long_short_term_memory(train, test, target_feature:str, features:list, n_ste
               shuffle=True, verbose=0)
     
     y_pred = model.predict(X_test, verbose=0)
-    train_pred = model.predict(X_train, verbose=0)
+    train_pred = model.predict(X, verbose=0)
 
     scaler_pred = MinMaxScaler()
     scaler_pred.min_, scaler_pred.scale_ = scaler.min_[idx_target], scaler.scale_[idx_target]
 
+    # prepare test data for plots
     y_pred = scaler_pred.inverse_transform(y_pred)
     y_true = scaler_pred.inverse_transform(y_test)
-    train_pred = scaler_pred.inverse_transform(train_pred)
-    y_train = scaler_pred.inverse_transform(y_train)
+    test[features] = scaler.inverse_transform(test[features])
+    y_true_plot = test[target_feature].values
+    y_pred_plot = np.empty_like(test)
+    y_pred_plot[:, :] = np.nan
+    y_pred_plot[n_steps_in : len(test), :] = y_pred
 
-    results = {'y_pred': y_pred,
-               'y_true': y_true,
-               'train_pred': train_pred,
-               'train_true': y_train,
+    # prepare training data for plots
+    train_pred = scaler_pred.inverse_transform(train_pred)
+    train[features] = scaler.inverse_transform(train[features])
+    y_train_plot = train[target_feature].values
+    train_pred_plot = np.empty_like(train)
+    train_pred_plot[:, :] = np.nan
+    train_pred_plot[n_steps_in : len(train), :] = train_pred
+
+    mae = single_point_mad(y_pred, y_true)
+
+    results = {'y_pred': y_pred_plot,
+               'y_true': y_true_plot,
+               'train_pred': train_pred_plot,
+               'train_true': y_train_plot,
                'loss' : history.history['loss'],
                'loss_final' : round(history.history['loss'][-1], 5),
                'val_loss' : history.history['val_loss'],
                'val_loss_final' : round(history.history['val_loss'][-1], 5),
                'mad': round(mad(y_pred, y_true), 1),
-               'mad?': round(single_point_mad(y_pred, y_true), 2)
+               'mad?': round(mae[0], 2),
+               'list_mad?': mae[1]
                }
 
     return results

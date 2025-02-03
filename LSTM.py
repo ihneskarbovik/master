@@ -61,7 +61,7 @@ def single_point_mad(y_pred, y_true):
     return np.mean(np.abs(pred_series - true_series)), np.abs(pred_series - true_series)
 
 
-def long_short_term_memory(train, test, target_feature:str, features:list, n_steps_in=5, n_steps_out=1, n_first_units=5, n_second_units=10):
+def long_short_term_memory(train, test, target_feature:str, features:list, campaigns:list, n_steps_in=5, n_steps_out=1, n_first_units=5, n_second_units=10):
 
     features.remove('campaign')
 
@@ -100,8 +100,7 @@ def long_short_term_memory(train, test, target_feature:str, features:list, n_ste
               validation_data=(X_val, y_val),
               shuffle=True, verbose=0)
     
-    y_pred = model.predict(X_test, verbose=0)
-    train_pred = model.predict(X, verbose=0)
+    y_pred = model.predict(X_test, verbose=0)    
 
     scaler_pred = MinMaxScaler()
     scaler_pred.min_, scaler_pred.scale_ = scaler.min_[idx_target], scaler.scale_[idx_target]
@@ -116,14 +115,30 @@ def long_short_term_memory(train, test, target_feature:str, features:list, n_ste
     y_pred_plot[n_steps_in : len(test), :] = y_pred
 
     # prepare training data for plots
-    train_pred = scaler_pred.inverse_transform(train_pred)
-    train[features] = scaler.inverse_transform(train[features])
-    y_train_plot = train[target_feature].values
-    train_pred_plot = np.empty_like(train)
-    train_pred_plot[:, :] = np.nan
-    train_pred_plot[n_steps_in : len(train), :] = train_pred
+    if len(campaigns) == 1:
+        train_pred = model.predict(X, verbose=0)
+
+        train_pred = scaler_pred.inverse_transform(train_pred)
+        train[features] = scaler.inverse_transform(train[features])
+        y_train_plot = train[target_feature].values
+        train_pred_plot = np.empty_like(train)
+        train_pred_plot[:, :] = np.nan
+        train_pred_plot[n_steps_in : len(train), :] = train_pred
+    else:
+        test_train = train[train['campaign'] == campaigns[0]]
+        test_train_seq, test_y_seq = series_split_sequences(test_train, test_train[target_feature], n_steps_in, n_steps_out)
+        train_pred = model.predict(test_train_seq, verbose=0)
+
+        train_pred = scaler_pred.inverse_transform(train_pred)
+        test_train[features] = scaler.inverse_transform(test_train[features])
+        y_train_plot = test_train[target_feature].values
+        train_pred_plot = np.empty_like(test_train)
+        train_pred_plot[:, :] = np.nan
+        train_pred_plot[n_steps_in : len(test_train), :] = train_pred
+        
 
     mae = single_point_mad(y_pred, y_true)
+    train_mae = single_point_mad(train_pred, test_y_seq)
 
     results = {'y_pred': y_pred_plot,
                'y_true': y_true_plot,
@@ -135,7 +150,9 @@ def long_short_term_memory(train, test, target_feature:str, features:list, n_ste
                'val_loss_final' : round(history.history['val_loss'][-1], 5),
                'mad': round(mad(y_pred, y_true), 1),
                'mad?': round(mae[0], 2),
-               'list_mad?': mae[1]
+               'list_mad?': mae[1],
+               'train_mad?': round(train_mae[0], 2),
+               'train_list_mad?': train_mae[1]
                }
 
     return results

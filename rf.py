@@ -1,8 +1,8 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 
-def rf(X_train, X_test, mode_train, mode_test):
-    rf = RandomForestClassifier()
+def rf(X_train, X_test, mode_train, mode_test, n_estimators=100):
+    rf = RandomForestClassifier(n_estimators=n_estimators)
     rf.fit(X_train, mode_train)
 
     y_pred = rf.predict(X_test)

@@ -120,6 +120,7 @@ def long_short_term_memory(train, test, target_feature:str, features:list, campa
 
         train_pred = scaler_pred.inverse_transform(train_pred)
         train[features] = scaler.inverse_transform(train[features])
+        
         y_train_plot = train[target_feature].values
         train_pred_plot = np.empty_like(train)
         train_pred_plot[:, :] = np.nan
@@ -131,6 +132,8 @@ def long_short_term_memory(train, test, target_feature:str, features:list, campa
 
         train_pred = scaler_pred.inverse_transform(train_pred)
         test_train[features] = scaler.inverse_transform(test_train[features])
+        test_y_seq = scaler_pred.inverse_transform(test_y_seq)
+
         y_train_plot = test_train[target_feature].values
         train_pred_plot = np.empty_like(test_train)
         train_pred_plot[:, :] = np.nan

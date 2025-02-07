@@ -1,9 +1,16 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler
 
 def rf(X_train, X_test, mode_train, mode_test, n_estimators=100):
     rf = RandomForestClassifier(n_estimators=n_estimators)
-    rf.fit(X_train, mode_train)
+    smote = SMOTE()
+    rus = RandomUnderSampler()
+    X_train_balanced, mode_train_balanced = smote.fit_resample(X_train, mode_train)
+    X_train_balanced, mode_train_balanced = rus.fit_resample(X_train_balanced, mode_train_balanced)
+
+    rf.fit(X_train_balanced, mode_train_balanced)
 
     y_pred = rf.predict(X_test)
     accuracy = accuracy_score(mode_test, y_pred)

@@ -61,7 +61,7 @@ def single_point_mad(y_pred, y_true):
     return np.mean(np.abs(pred_series - true_series)), np.abs(pred_series - true_series)
 
 
-def long_short_term_memory(train, test, target_feature:str, features:list, campaigns:list, n_steps_in=5, n_steps_out=1, n_first_units=5, n_second_units=10):
+def long_short_term_memory(train, test, target_feature:str, features:list, campaigns:list, test_campaigns:list, n_steps_in=5, n_steps_out=1, n_first_units=5, n_second_units=10):
 
     features.remove('campaign')
 
@@ -98,21 +98,36 @@ def long_short_term_memory(train, test, target_feature:str, features:list, campa
     history = model.fit(X_train, y_train,
               epochs=100,
               validation_data=(X_val, y_val),
-              shuffle=True, verbose=0)
-    
-    y_pred = model.predict(X_test, verbose=0)    
+              shuffle=True, verbose=0)   
 
     scaler_pred = MinMaxScaler()
     scaler_pred.min_, scaler_pred.scale_ = scaler.min_[idx_target], scaler.scale_[idx_target]
 
     # prepare test data for plots
-    y_pred = scaler_pred.inverse_transform(y_pred)
-    y_true = scaler_pred.inverse_transform(y_test)
-    test[features] = scaler.inverse_transform(test[features])
-    y_true_plot = test[target_feature].values
-    y_pred_plot = np.empty_like(test)
-    y_pred_plot[:, :] = np.nan
-    y_pred_plot[n_steps_in : len(test), :] = y_pred
+    if len(test_campaigns) == 1:
+        y_pred = model.predict(X_test, verbose=0) 
+
+        y_pred = scaler_pred.inverse_transform(y_pred)
+        y_true = scaler_pred.inverse_transform(y_test)
+        test[features] = scaler.inverse_transform(test[features])
+
+        y_true_plot = test[target_feature].values
+        y_pred_plot = np.empty_like(test)
+        y_pred_plot[:, :] = np.nan
+        y_pred_plot[n_steps_in : len(test), :] = y_pred
+    else:
+        test_test = test[test['campaign'] == test_campaigns[0]]
+        test_seq, test_test_seq = series_split_sequences(test_test, test_test[target_feature], n_steps_in, n_steps_out)
+        y_pred = model.predict(test_seq, verbose=0)
+
+        y_pred = scaler_pred.inverse_transform(y_pred)
+        y_true = scaler_pred.inverse_transform(y_test)
+        test_test[features] = scaler.inverse_transform(test_test[features])
+
+        y_true_plot = test_test[target_feature].values
+        y_pred_plot = np.empty_like(test_test)
+        y_pred_plot[:, :] = np.nan
+        y_pred_plot[n_steps_in : len(test_test), :] = y_pred
 
     # prepare training data for plots
     if len(campaigns) == 1:

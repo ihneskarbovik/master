@@ -30,25 +30,11 @@ def series_split_sequences(f, t, n_steps_in, n_steps_out):
 
     return np.array(X), np.array(y)
 
-'''
-    Returns the mean absolute deviation
-'''
-def mad(y_pred, y_true):
-    pred_series, true_series = [], []
-
-    for i in range(len(y_pred)):
-        for k in range(len(y_pred[i])):
-            pred_series.append(y_pred[i][k])
-            true_series.append(y_true[i][k])
-
-    pred_series, true_series = np.array(pred_series), np.array(true_series)
-
-    return np.mean(np.abs(pred_series - np.mean(true_series)))
 
 '''
-    Returns the mean absolute deviation on each datapoint
+    Returns the mean absolute error on each datapoint
 '''
-def single_point_mad(y_pred, y_true):
+def single_point_mae(y_pred, y_true):
     pred_series, true_series = [], []
 
     for i in range(len(y_pred)):
@@ -121,7 +107,7 @@ def long_short_term_memory(train, test, target_feature:str, features:list, campa
         y_pred = model.predict(test_seq, verbose=0)
 
         y_pred = scaler_pred.inverse_transform(y_pred)
-        y_true = scaler_pred.inverse_transform(y_test)
+        y_true = scaler_pred.inverse_transform(test_test_seq)
         test_test[features] = scaler.inverse_transform(test_test[features])
 
         y_true_plot = test_test[target_feature].values
@@ -155,8 +141,8 @@ def long_short_term_memory(train, test, target_feature:str, features:list, campa
         train_pred_plot[n_steps_in : len(test_train), :] = train_pred
         
 
-    mae = single_point_mad(y_pred, y_true)
-    train_mae = single_point_mad(train_pred, test_y_seq)
+    mae = single_point_mae(y_pred, y_true)
+    train_mae = single_point_mae(train_pred, test_y_seq)
 
     results = {'y_pred': y_pred_plot,
                'y_true': y_true_plot,
@@ -166,11 +152,10 @@ def long_short_term_memory(train, test, target_feature:str, features:list, campa
                'loss_final' : round(history.history['loss'][-1], 5),
                'val_loss' : history.history['val_loss'],
                'val_loss_final' : round(history.history['val_loss'][-1], 5),
-               'mad': round(mad(y_pred, y_true), 1),
-               'mad?': round(mae[0], 2),
-               'list_mad?': mae[1],
-               'train_mad?': round(train_mae[0], 2),
-               'train_list_mad?': train_mae[1]
+               'mae': round(mae[0], 2),
+               'list_mae': mae[1],
+               'train_mae': round(train_mae[0], 2),
+               'train_list_mae': train_mae[1]
                }
 
     return results

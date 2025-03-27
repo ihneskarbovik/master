@@ -101,6 +101,18 @@ def long_short_term_memory(train, test, target_feature:str, features:list, campa
         y_pred_plot = np.empty_like(test)
         y_pred_plot[:, :] = np.nan
         y_pred_plot[n_steps_in : len(test), :] = y_pred
+
+        train_pred = model.predict(X, verbose=0)
+
+        train_pred = scaler_pred.inverse_transform(train_pred)
+        train[features] = scaler.inverse_transform(train[features])
+        _, test_y_seq = series_split_sequences(train, train[target_feature], n_steps_in, n_steps_out)
+        
+        y_train_plot = train[target_feature].values
+        train_pred_plot = np.empty_like(train)
+        train_pred_plot[:, :] = np.nan
+        train_pred_plot[n_steps_in : len(train), :] = train_pred
+
     else:
         test_test = test[test['campaign'] == test_campaigns[0]]
         test_seq, test_test_seq = series_split_sequences(test_test, test_test[target_feature], n_steps_in, n_steps_out)
@@ -115,18 +127,6 @@ def long_short_term_memory(train, test, target_feature:str, features:list, campa
         y_pred_plot[:, :] = np.nan
         y_pred_plot[n_steps_in : len(test_test), :] = y_pred
 
-    # prepare training data for plots
-    if len(campaigns) == 1:
-        train_pred = model.predict(X, verbose=0)
-
-        train_pred = scaler_pred.inverse_transform(train_pred)
-        train[features] = scaler.inverse_transform(train[features])
-        
-        y_train_plot = train[target_feature].values
-        train_pred_plot = np.empty_like(train)
-        train_pred_plot[:, :] = np.nan
-        train_pred_plot[n_steps_in : len(train), :] = train_pred
-    else:
         test_train = train[train['campaign'] == campaigns[0]]
         test_train_seq, test_y_seq = series_split_sequences(test_train, test_train[target_feature], n_steps_in, n_steps_out)
         train_pred = model.predict(test_train_seq, verbose=0)
@@ -139,6 +139,9 @@ def long_short_term_memory(train, test, target_feature:str, features:list, campa
         train_pred_plot = np.empty_like(test_train)
         train_pred_plot[:, :] = np.nan
         train_pred_plot[n_steps_in : len(test_train), :] = train_pred
+
+    mae = single_point_mae(y_pred, y_true)
+    train_mae = single_point_mae(train_pred, test_y_seq)
         
 
     mae = single_point_mae(y_pred, y_true)

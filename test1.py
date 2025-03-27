@@ -1,4 +1,4 @@
-import preparing_data as prep
+import test0_preparing_data as prep
 import numpy as np
 from keras.models import Sequential
 import matplotlib.pyplot as plt

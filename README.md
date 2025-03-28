@@ -6,6 +6,8 @@
 * I test11 og test12 må jeg ende 0 og 1 på y-aksen til 4g og 5g
 * Kjøre alt på nytt og lagre med resultater (i hvertfall sinr_pred, rsrp_pred og rsrq_pred)
 
+* Prøve å vekte klassene til RF!!!
+
 
 ## Notater fra møter
 * Prøv med enda ferre steg bakover med LSTM (Kostas foreslo å vise dette i en tabell)

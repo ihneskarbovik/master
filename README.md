@@ -14,9 +14,9 @@
 
 * Hvis det er overlappende ruter på OP1 og OP2 kan jeg prøve å trene på en OP og teste på den andre OP
 
-* Test med samme ruter og tren med en og test med en annen
+* 👊🏼 Test med samme ruter og tren med en og test med en annen
     - 👊🏼 Må gjøres systematisk; tren 1, test 1 --> tren 2, test 1 --> tren 3, test 1 --> tren 4, test 1 --> tren 5, test 1
-    - Kan også vurdere (men teori er at det funker dårligere): test på 70% av to ruter (overlappende 70%) og test på gjenværende 30% av begge rutene, med samme strategi som over
+    - 👊🏼 Kan også vurdere (men teori er at det funker dårligere): test på 70% av to ruter (overlappende 70%) og test på gjenværende 30% av begge rutene, med samme strategi som over
 
 * 👊🏼 Hvis jeg tester med samme rute, kan vi prøve med lokasjon!! -- var ikke så mye å hente på det, ref similar_campaigns.ipynb
 

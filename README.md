@@ -10,7 +10,7 @@
 
 
 ## Notater fra møter
-* 👊🏼 Prøv med enda ferre steg bakover med LSTM (Kostas foreslo å vise dette i en tabell) 👊🏼
+* 👊🏼 Prøv med enda ferre steg bakover med LSTM (Kostas foreslo å vise dette i en tabell)
 
 * Hvis det er overlappende ruter på OP1 og OP2 kan jeg prøve å trene på en OP og teste på den andre OP
 
@@ -27,3 +27,17 @@
 
 * Se på accuracy på 1. steg, 1. + 2. steg, 1. + 2. + 3. steg, osv. Se om accuracy dropper og hvor stort vinduet men fortsatt ha en gitt sikkerhet på at det kommer til å inntreffe en HO
     - 👊🏼 Gjøre det samme med mean absolute error
+
+* Se om jeg kan omgjøre gps dataen til en kolonne i stedet for lat og long
+
+* Må legge RF oppå LSTM, teste med det vinduet og se på accuracy som beskrevet tidligere!
+
+
+* Marker rett og gale prediksjoner med farge og scatterplot for å se om det er et sånn 'range of theshold': plot med yakse: sss-rsrp, x-akse:rsrp maybe?? experiment with parameters on the x and y axis
+    - Burde starte med å plotte bare 4G, 5G på samme måte
+    - Er det buffer periode mellom ho? for å unngå pingpong effekt (hysterizis). Range of theshold?
+
+
+
+
+Notat: ss og vanlig er inne 1:1 comparable men begge er logaritmic

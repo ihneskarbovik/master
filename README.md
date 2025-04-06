@@ -32,8 +32,7 @@
 
 * Må legge RF oppå LSTM, teste med det vinduet og se på accuracy som beskrevet tidligere!
 
-
-* Marker rett og gale prediksjoner med farge og scatterplot for å se om det er et sånn 'range of theshold': plot med yakse: sss-rsrp, x-akse:rsrp maybe?? experiment with parameters on the x and y axis
+* 👊🏼 Marker rett og gale prediksjoner med farge og scatterplot for å se om det er et sånn 'range of theshold': plot med yakse: sss-rsrp, x-akse:rsrp maybe?? experiment with parameters on the x and y axis
     - Burde starte med å plotte bare 4G, 5G på samme måte
     - Er det buffer periode mellom ho? for å unngå pingpong effekt (hysterizis). Range of theshold?
 

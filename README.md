@@ -1,6 +1,10 @@
 # master
 
 
+## filer som har lagret plots:
+ - test10
+ - test 17
+ - har starta å implementere det for test22_op2 
 
 ## TODO
 * I test11 og test12 må jeg ende 0 og 1 på y-aksen til 4g og 5g
@@ -12,7 +16,7 @@
 ## Notater fra møter
 * 👊🏼 Prøv med enda ferre steg bakover med LSTM (Kostas foreslo å vise dette i en tabell)
 
-* Hvis det er overlappende ruter på OP1 og OP2 kan jeg prøve å trene på en OP og teste på den andre OP
+* Hvis det er overlappende ruter på OP1 og OP2 kan jeg prøve å trene på en OP og teste på den andre OP -- og motsatt
 
 * 👊🏼 Test med samme ruter og tren med en og test med en annen
     - 👊🏼 Må gjøres systematisk; tren 1, test 1 --> tren 2, test 1 --> tren 3, test 1 --> tren 4, test 1 --> tren 5, test 1
@@ -23,12 +27,10 @@
 * 👊🏼 Hvis vi trener på en rute og tester på en annen, funker det dårlig? Hvis testing på samme rute funker bra?
 
 
-* Prøv å isolere features
-
 * Se på accuracy på 1. steg, 1. + 2. steg, 1. + 2. + 3. steg, osv. Se om accuracy dropper og hvor stort vinduet men fortsatt ha en gitt sikkerhet på at det kommer til å inntreffe en HO
     - 👊🏼 Gjøre det samme med mean absolute error
 
-* Se om jeg kan omgjøre gps dataen til en kolonne i stedet for lat og long
+* 👊🏼 Se om jeg kan omgjøre gps dataen til en kolonne i stedet for lat og long
 
 * Må legge RF oppå LSTM, teste med det vinduet og se på accuracy som beskrevet tidligere!
 

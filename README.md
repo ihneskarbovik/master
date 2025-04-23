@@ -1,11 +1,5 @@
 # master
 
-
-## filer som har lagret plots:
- - test10
- - test 17
- - har starta å implementere det for test22_op2 
-
 ## TODO
 * I test11 og test12 må jeg ende 0 og 1 på y-aksen til 4g og 5g
 * Kjøre alt på nytt og lagre med resultater

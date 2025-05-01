@@ -36,3 +36,15 @@
 
 
 Notat: ss og vanlig er inne 1:1 comparable men begge er logaritmic
+
+
+
+
+## Notater fra møtet 30. april
+start fra HO perspektivet i første rq -- bruk ho som motivasjon og vi gjøre mode pred pga det
+
+trenger ikke skrive lstm/rf i rq tittel
+
+- vis plot som viser split av test og tren med 60% tren og 40% av test av samme rute 
+
+- the impact of different training strategy (impact of the amount of data and handeling -- repeating measurements in the same area)
